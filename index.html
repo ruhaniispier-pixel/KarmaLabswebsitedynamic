@@ -351,7 +351,10 @@
       <p>Tell us what you sell, who you want to reach and what you want Quora to do for the brand.</p>
     </div>
 
-    <form class="contact-form reveal" id="leadForm">
+    <form class="contact-form reveal" id="formspreeForm"
+      action="https://formspree.io/f/xnpqkwag"
+      method="POST">
+      <input type="hidden" name="_subject" value="New Karma Labs Website Enquiry">
       <div class="two">
         <label>Name<input type="text" name="name" placeholder="Your name" required></label>
         <label>Email<input type="email" name="email" placeholder="you@company.com" required></label>
@@ -406,5 +409,52 @@
 </footer>
 
 <script src="script.js"></script>
+
+<script>
+  const formspreeForm = document.getElementById("formspreeForm");
+  const submitBtn = document.getElementById("submitBtn");
+  const formStatus = document.getElementById("formStatus");
+
+  if (formspreeForm) {
+    formspreeForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "SENDING...";
+      formStatus.textContent = "Sending your enquiry...";
+
+      try {
+        const response = await fetch(formspreeForm.action, {
+          method: "POST",
+          body: new FormData(formspreeForm),
+          headers: {
+            "Accept": "application/json"
+          }
+        });
+
+        if (response.ok) {
+          formspreeForm.reset();
+          formStatus.textContent = "Thanks! Your enquiry has been sent to Karma Labs.";
+          submitBtn.textContent = "ENQUIRY SENT ✓";
+        } else {
+          let message = "Something went wrong. Please try again.";
+          try {
+            const data = await response.json();
+            if (data && Array.isArray(data.errors) && data.errors.length) {
+              message = data.errors.map(error => error.message).join(", ");
+            }
+          } catch (_) {}
+          formStatus.textContent = message;
+          submitBtn.textContent = "REQUEST MY QUORA PLAN →";
+          submitBtn.disabled = false;
+        }
+      } catch (error) {
+        formStatus.textContent = "Unable to send right now. Please try again.";
+        submitBtn.textContent = "REQUEST MY QUORA PLAN →";
+        submitBtn.disabled = false;
+      }
+    });
+  }
+</script>
 </body>
 </html>
